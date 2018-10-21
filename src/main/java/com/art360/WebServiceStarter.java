@@ -9,9 +9,6 @@ import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.firewall.DefaultHttpFirewall;
-import org.springframework.security.web.firewall.HttpFirewall;
 
 @SpringBootApplication
 public class WebServiceStarter {
@@ -31,13 +28,4 @@ public class WebServiceStarter {
     return new MongoTemplate(mongoDbFactory, converter);
   }
 
-  @Bean
-  public BCryptPasswordEncoder bCryptPasswordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
-
-  @Bean
-  public HttpFirewall defaultHttpFirewall() {
-    return new DefaultHttpFirewall();
-  }
 }
