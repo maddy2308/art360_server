@@ -6,27 +6,32 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-import java.util.List;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
-public class ArtistInformation {
+@Document(collection = "ArtistInformation")
+@Builder
+public class Artist {
 
   @Id
   @JsonProperty("_id")
   private String _id;
 
   @JsonProperty("email")
+  @Size(min=10, message="Email should be atleast 10 characters")
   @Email(message="Passed value is not a well formed email")
   private String email;
 
   @JsonProperty("password")
   @NotEmpty(message="Password can not be empty")
+  @Size(min=8, message="Password should be atleast 8 characters")
   private String password;
 
   @NotEmpty(message="You need to provide a name")

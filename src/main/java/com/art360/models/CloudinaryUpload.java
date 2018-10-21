@@ -1,49 +1,49 @@
 package com.art360.models;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class CloudinaryUpload {
+class CloudinaryUpload {
 
-  private String[] tags;
+  @Field("original_filename")
+  private String originalFilename;
 
-  private String original_extension;
-
-  private long bytes;
-
-  private String etag;
-
-  private boolean placeholder;
-
-  private long width;
-
-  private String public_id;
-
-  private String format;
-
-  private String type;
-
-  private String original_filename;
+  @Field("secure_url")
+  private String secureURL;
 
   private String url;
 
-  private String version;
+  private boolean placeholder;
 
-  private long height;
+  private String etag;
 
-  private String resource_type;
+  private String type;
 
-  private Date created_at;
+  private long bytes;
 
+  private List<String> tags;
+
+  @Field("created_at")
+  private String createdAt;
+
+  @Field("resource_type")
+  private String resourceType;
+
+  private String format;
+
+  private int height;
+  private int width;
   private String signature;
+  private long version;
 
-  private String secure_url;
+  @Field("public_id")
+  private String publicId;
 
 }

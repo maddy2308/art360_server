@@ -1,9 +1,10 @@
 package com.art360.dao;
 
-import com.art360.models.ArtistInformation;
+import com.art360.models.Artist;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface ArtistRepository extends MongoRepository<ArtistInformation, String> {
+public interface ArtistRepository extends MongoRepository<Artist, ObjectId> {
 
-  ArtistInformation findArtistByEmail(String email);
+  Artist findByEmail(String email);
 }
