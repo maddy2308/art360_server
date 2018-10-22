@@ -12,9 +12,13 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.*;
+
 
 @SpringBootApplication
-public class WebServiceStarter {
+@EnableWebSocketMessageBroker
+public class WebServiceStarter implements WebSocketMessageBrokerConfigurer{
 
   public static void main(String[] args) {
     SpringApplication.run(WebServiceStarter.class, args);
@@ -29,6 +33,17 @@ public class WebServiceStarter {
     converter.setTypeMapper(new DefaultMongoTypeMapper(null));
 
     return new MongoTemplate(mongoDbFactory, converter);
+  }
+
+  @Override
+  public void registerStompEndpoints(StompEndpointRegistry registry) {
+    registry.addEndpoint("/ws").withSockJS();
+  }
+
+  @Override
+  public void configureMessageBroker(MessageBrokerRegistry registry) {
+    registry.setApplicationDestinationPrefixes("/app");
+    registry.enableSimpleBroker("/topic");
   }
 
   @Bean
