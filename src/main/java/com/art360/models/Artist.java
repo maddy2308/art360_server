@@ -3,6 +3,7 @@ package com.art360.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 @Setter
 @Document(collection = "ArtistInformation")
 @Builder
+@NoArgsConstructor
 public class Artist {
 
   @Id
