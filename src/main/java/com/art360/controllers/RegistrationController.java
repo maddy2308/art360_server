@@ -2,6 +2,7 @@ package com.art360.controllers;
 
 import com.art360.dao.ArtistRepository;
 import com.art360.models.Artist;
+import com.art360.models.ArtistProjection;
 import com.art360.models.ErrorDetails;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -32,8 +34,10 @@ public class RegistrationController extends ResponseEntityExceptionHandler {
   }
 
   @PostMapping("/sign-up")
-  public @ResponseBody Artist signUp(@Valid @RequestBody Artist artist) {
+  @ResponseStatus(HttpStatus.CREATED)
+  public @ResponseBody ArtistProjection signUp(@Valid @RequestBody Artist artist) {
     artist.setPassword(bCryptPasswordEncoder.encode(artist.getPassword()));
+    artist.setRole("USER");
     return artistRepository.save(artist);
   }
 

@@ -1,5 +1,6 @@
 package com.art360.security;
 
+import com.art360.Utilities.JWTPayload;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -44,15 +45,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
   private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
     String token = request.getHeader(HEADER_STRING);
     if (token != null) {
-      // parse the token.
-      DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
-          .build()
-          .verify(token.replace(TOKEN_PREFIX, ""));
-      String user = decodedJWT.getSubject();
-      String role = "ROLE_" + decodedJWT.getClaim("role").asString();
-
-      if (user != null) {
-        return new UsernamePasswordAuthenticationToken(user, null, Collections.singletonList(new SimpleGrantedAuthority(role)));
+      JWTPayload payload = JWTPayload.decode(token);
+      if (payload.getUser() != null) {
+        return new UsernamePasswordAuthenticationToken(payload.getUser(), null,
+            Collections.singletonList(new SimpleGrantedAuthority(payload.getRole())));
       }
       return null;
     }

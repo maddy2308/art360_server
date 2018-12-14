@@ -30,6 +30,8 @@ public class Art {
 
   private String artistName;
 
+  private String artName;
+
   private String artType;
 
   private String description;

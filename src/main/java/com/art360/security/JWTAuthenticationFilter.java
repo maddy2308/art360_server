@@ -22,10 +22,15 @@ import static com.art360.security.SecurityConstants.*;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-  private AuthenticationManager authenticationManager;
 
-  JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
+  private AuthenticationManager authenticationManager;
+  private UserDetailsServiceImpl userDetailsService;
+
+  JWTAuthenticationFilter(
+      final AuthenticationManager authenticationManager,
+      final UserDetailsServiceImpl userDetailsService) {
     this.authenticationManager = authenticationManager;
+    this.userDetailsService = userDetailsService;
   }
 
   @Override
@@ -51,9 +56,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                           FilterChain chain,
                                           Authentication auth) {
 
-
+    String id = userDetailsService.getUserId(((User) auth.getPrincipal()).getUsername());
     String token = JWT.create()
-        .withSubject(((User) auth.getPrincipal()).getUsername())
+        .withSubject(id)
         .withClaim("role", auth.getAuthorities().toArray()[0].toString())
         .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
         .sign(HMAC512(SECRET.getBytes()));

@@ -28,4 +28,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     return new User(artist.getEmail(), artist.getPassword(),
         Collections.singletonList(new SimpleGrantedAuthority(artist.getRole())));
   }
+
+  String getUserId(String username) {
+    Artist artist = artistRepository.findByEmail(username.toLowerCase());
+    if (artist == null) {
+      throw new UsernameNotFoundException(username);
+    } else {
+      return artist.get_id();
+    }
+  }
 }
