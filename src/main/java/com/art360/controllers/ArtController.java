@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -56,13 +57,16 @@ public class ArtController {
       } catch (NotValidActionException e) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "You are not allowed to perform this action", e);
+      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        e.printStackTrace();
       }
     });
     return updatedArt.get();
   }
 
   private Art patchAndSaveArt(final String authorization, final Art artFound, Art updatedArt)
-      throws NotValidActionException {
+      throws NotValidActionException, NoSuchMethodException, IllegalAccessException,
+      InvocationTargetException {
     if (ExtraAuthSecurity.isMe(authorization, artFound.getArtist())) {
       artRepository.save(updateArt(artFound, updatedArt));
       return artFound;
@@ -72,14 +76,24 @@ public class ArtController {
     }
   }
 
-  private Art updateArt(Art oldRecord, Art newRecord) {
-    oldRecord.setArtName(newRecord.getArtName());
-    oldRecord.setArtType(newRecord.getArtType());
-    oldRecord.setDescription(newRecord.getDescription());
-    oldRecord.setIsPublic(newRecord.getIsPublic());
+  private Art updateArt(Art oldRecord, Art newRecord)
+      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+
+    updatePropertyIfNotEmpty(newRecord, "getArtName", oldRecord, "setArtName");
+    updatePropertyIfNotEmpty(newRecord, "getArtType", oldRecord, "setArtType");
+    updatePropertyIfNotEmpty(newRecord, "getDescription", oldRecord, "setDescription");
+    updatePropertyIfNotEmpty(newRecord, "getIsPublic", oldRecord, "setIsPublic");
+    updatePropertyIfNotEmpty(newRecord, "getUploadedImages", oldRecord, "setUploadedImages");
     oldRecord.setUpdated(String.valueOf(new Date().getTime()));
-    oldRecord.setUploadedImages(newRecord.getUploadedImages());
 
     return oldRecord;
+  }
+
+  private void updatePropertyIfNotEmpty(Art newRecord, String getterMethod, Art oldRecord, String setterMethod)
+      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    String newValue = newRecord.getClass().getMethod(getterMethod).invoke(newRecord).toString();
+    if (!newValue.isEmpty()) {
+      oldRecord.getClass().getMethod(setterMethod).invoke(oldRecord, newValue );
+    }
   }
 }

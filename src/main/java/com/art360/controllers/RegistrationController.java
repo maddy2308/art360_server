@@ -35,10 +35,15 @@ public class RegistrationController extends ResponseEntityExceptionHandler {
 
   @PostMapping("/sign-up")
   @ResponseStatus(HttpStatus.CREATED)
-  public @ResponseBody ArtistProjection signUp(@Valid @RequestBody Artist artist) {
+  public ResponseEntity signUp(@Valid @RequestBody Artist artist) {
     artist.setPassword(bCryptPasswordEncoder.encode(artist.getPassword()));
     artist.setRole("USER");
-    return artistRepository.save(artist);
+    try {
+      artistRepository.save(artist);
+      return ResponseEntity.status(HttpStatus.CREATED).build();
+    } catch(Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
   }
 
   @Override

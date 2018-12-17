@@ -9,5 +9,5 @@ public interface ArtistRepository extends MongoRepository<Artist, ObjectId> {
 
   Artist findByEmail(String email);
 
-  ArtistProjection save(Artist artist);
+  Artist save(Artist artist);
 }
