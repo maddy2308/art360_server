@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ArtController {
 
   @RequestMapping(value = "artist/{artistId}/art", method = RequestMethod.GET,
       produces = "application/json")
-  public List<Art> getAllArts(@PathVariable("artistId") ObjectId artistId) {
+  public List<Art> getAllArts(@PathVariable("artistId") String artistId) {
     return this.artRepository.findByArtist(artistId);
   }
 
@@ -79,21 +80,28 @@ public class ArtController {
   private Art updateArt(Art oldRecord, Art newRecord)
       throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
-    updatePropertyIfNotEmpty(newRecord, "getArtName", oldRecord, "setArtName");
-    updatePropertyIfNotEmpty(newRecord, "getArtType", oldRecord, "setArtType");
-    updatePropertyIfNotEmpty(newRecord, "getDescription", oldRecord, "setDescription");
-    updatePropertyIfNotEmpty(newRecord, "getIsPublic", oldRecord, "setIsPublic");
-    updatePropertyIfNotEmpty(newRecord, "getUploadedImages", oldRecord, "setUploadedImages");
+    updatePropertyIfNotEmpty(newRecord, "getArtName", oldRecord, "setArtName",
+        String.class);
+    updatePropertyIfNotEmpty(newRecord, "getArtistName", oldRecord, "setArtistName",
+        String.class);
+    updatePropertyIfNotEmpty(newRecord, "getArtType", oldRecord, "setArtType", String.class);
+    updatePropertyIfNotEmpty(newRecord, "getDescription", oldRecord, "setDescription",
+        String.class);
+    updatePropertyIfNotEmpty(newRecord, "getIsPublic", oldRecord, "setIsPublic", Boolean.class);
+    updatePropertyIfNotEmpty(newRecord, "getUploadedImages", oldRecord, "setUploadedImages",
+        List.class);
     oldRecord.setUpdated(String.valueOf(new Date().getTime()));
 
     return oldRecord;
   }
 
-  private void updatePropertyIfNotEmpty(Art newRecord, String getterMethod, Art oldRecord, String setterMethod)
+  private void updatePropertyIfNotEmpty(Art newRecord, String getterMethod, Art oldRecord,
+                                        String setterMethod, Serializable serializable)
       throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    String newValue = newRecord.getClass().getMethod(getterMethod).invoke(newRecord).toString();
-    if (!newValue.isEmpty()) {
-      oldRecord.getClass().getMethod(setterMethod).invoke(oldRecord, newValue );
+    Object newValue = newRecord.getClass().getMethod(getterMethod).invoke(newRecord);
+    if (newValue != null) {
+      oldRecord.getClass().getDeclaredMethod(setterMethod, (Class<?>) serializable)
+          .invoke(oldRecord, ((Class<?>) serializable).cast(newValue));
     }
   }
 }
