@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ArtRepository extends MongoRepository<Art, ObjectId> {
 
-    List<Art> findByArtist(String artistId);
+  List<Art> findByArtist(String artistId);
 }

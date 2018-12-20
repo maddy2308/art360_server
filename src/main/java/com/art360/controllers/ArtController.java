@@ -6,11 +6,14 @@ import com.art360.exceptions.NotValidActionException;
 import com.art360.models.Art;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.validation.Valid;
 
 @RestController
+@PreAuthorize("hasRole('ROLE_USER')")
 public class ArtController {
 
   private final ArtRepository artRepository;
@@ -34,18 +38,25 @@ public class ArtController {
 
   @RequestMapping(value = "artist/{artistId}/art", method = RequestMethod.GET,
       produces = "application/json")
-  public List<Art> getAllArts(@PathVariable("artistId") String artistId) {
+  public List<Art> getAllArtsOfAnArtist(@PathVariable("artistId") String artistId) {
     return this.artRepository.findByArtist(artistId);
   }
 
   @RequestMapping(value = "/art", method = RequestMethod.POST, produces = "application/json")
   @ResponseStatus(HttpStatus.CREATED)
-  private Art saveNewArt(@Valid @RequestBody Art art) {
-    return this.artRepository.save(art);
+  private Art saveNewArt(@Valid @RequestBody Art art,
+                         @RequestHeader(value = "Authorization") String authorization)
+      throws NotValidActionException {
+    if (ExtraAuthSecurity.isMe(authorization, art.getArtist())) {
+      return this.artRepository.save(art);
+    } else {
+      throw new NotValidActionException(
+          "This art doesn't belong to you and so you cannot perform this action");
+    }
   }
 
   @RequestMapping(value = "/art/{id}", method = RequestMethod.PATCH, produces = "application/json")
-  private Art updateArt(@RequestHeader(value = "authorization") String authorization,
+  private Art updateArt(@RequestHeader(value = "Authorization") String authorization,
                         @PathVariable("id") String id,
                         @Valid @RequestBody Art art) {
 
@@ -103,5 +114,28 @@ public class ArtController {
       oldRecord.getClass().getDeclaredMethod(setterMethod, (Class<?>) serializable)
           .invoke(oldRecord, ((Class<?>) serializable).cast(newValue));
     }
+  }
+
+  @RequestMapping(value = "art/{id}", method = RequestMethod.DELETE,
+      produces = "application/json")
+  public ResponseEntity deleteArt(@PathVariable("id") String artId,
+                                  @RequestHeader(value = "Authorization") String authorization) {
+    Optional<Art> artToDelete = this.artRepository.findById(new ObjectId(artId));
+    final AtomicReference<ResponseEntity<String>> entity = new AtomicReference<>();
+    artToDelete.ifPresent(artFound -> {
+      if (ExtraAuthSecurity.isMe(authorization, artFound.getArtist())) {
+        artRepository.delete(artToDelete.get());
+        entity.set(new ResponseEntity<>("Art is deleted", null, HttpStatus.OK));
+      } else {
+        entity.set(new ResponseEntity<>("This art doesn't belong to you", null, HttpStatus.OK));
+      }
+    });
+    return entity.get();
+  }
+
+  @RequestMapping(value = "/public_art/", method = RequestMethod.GET, produces = "application/json")
+  public List<Art> getAllPublicArt(@RequestParam("isPublic") boolean isPublic) {
+//    return this.artRepository.findAllByIsPublic(true);
+    return null;
   }
 }
