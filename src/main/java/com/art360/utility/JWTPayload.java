@@ -1,4 +1,4 @@
-package com.art360.Utilities;
+package com.art360.utility;
 
 import static com.art360.security.SecurityConstants.TOKEN_PREFIX;
 

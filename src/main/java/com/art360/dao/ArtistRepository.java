@@ -4,7 +4,9 @@ import com.art360.models.Artist;
 import com.art360.models.ArtistProjection;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Component;
 
+@Component
 public interface ArtistRepository extends MongoRepository<Artist, ObjectId> {
 
   Artist findByEmail(String email);

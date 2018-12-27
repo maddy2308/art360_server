@@ -1,4 +1,4 @@
-package com.art360.controllers;
+package com.art360.controller;
 
 import com.art360.dao.ArtistRepository;
 import com.art360.models.Artist;
